@@ -3,13 +3,14 @@ import React, { Component } from 'react';
 import './App.css';
 import { Timeline } from './react-timeline';
 import moment from 'moment'
+import { InputTagsContainer } from 'react-input-tags';
 import {API_ROOT} from './api-config'
 
 class Nav extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchText: props.clan && `${props.clan['region']}/${props.clan['tag']}` || ''
+      searchText: props.clanTag && `${props.region}/${props.clanTag}` || ''
     }
   }
 
@@ -32,19 +33,19 @@ class Nav extends React.Component {
   }
 
   render() {
-    let logo, clanTag;
-    if(this.props.clan) {
-      logo = this.props.clan['emblems']['x32']['portal'];
-      clanTag = this.props.clan['tag']
+    let logo, title = 'Battles';
+    if(this.props.clanTag) {
+      const clanId = this.props.clanId && this.props.clanId.toString() || '';
+      logo = `https://${this.props.region}.wargaming.net/clans/media/clans/emblems/cl_${clanId.substr(clanId.length - 3)}/${this.props.clanId}/emblem_64x64.png`;
+      title = this.props.clanTag.toUpperCase()
     } else {
       logo = '';
-      clanTag = ''
+      title = 'Battles'
     }
 
     return <nav className="navbar navbar-expand-md navbar-dark bg-dark flex-md-nowrap p-0 shadow">
       <a className="navbar-brand col-sm-3 col-md-2 mr-0" href="/">
-        <img src={logo} width="30" height="30" className="d-inline-block align-top" alt=""/>
-        {clanTag}
+        <img src={logo} width="30" height="30" className="d-inline-block align-top" alt=""/> {title}
       </a>
       <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
               aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,31 +64,88 @@ class Nav extends React.Component {
 }
 
 class RowCell extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {tags: this.props.data.tags}
+  }
+
+  handleUpdateTags = (tags) => {
+    const url = `${API_ROOT}/tags/${this.props.data.region}/${this.props.data.clan_id}/${this.props.data.id}`
+
+    this.setState(prevState => {
+      fetch(url, {
+        body: JSON.stringify({tags: tags}),
+        method: 'POST',
+      });
+      return {tags: tags}
+    })
+  }
+
   render() {/* style={{backgroundColor: '#fff', height: '100%', width: '100%'}}>*/
-    console.log(this.props.data)
+    // console.log(this.props.data)
+    const title = `${this.props.data.province_name} / ${this.props.data.arena_name}`
     const start_time = moment(this.props.data.start_time)
+    const serverFront = `${this.props.data.server} / ${this.props.data.front_name}`
+
     return <div>
-      <a style={{fontSize: 12}}
-        href={`https://${this.props.data.region}.wargaming.net/globalmap/#province/${this.props.data.id}`}>
-        {this.props.data.province_name} {start_time.format('HH:mm')}<br/>
-        {this.props.data.arena_name}
+      <a style={{fontSize: 12, position: 'absolute', left: 0, top: 0, width: 260, overflow: 'hidden', whiteSpace: 'nowrap'}}
+        href={`https://${this.props.data.region}.wargaming.net/globalmap/#province/${this.props.data.id}`} title={title}>
+        {title}
       </a>
+      <span style={{fontSize: 12, position: 'absolute', right: 0, top: 0, width: 40, overflow: 'hidden', whiteSpace: 'nowrap'}}>
+        {start_time.format('HH:mm')}</span>
+      <div style={{fontSize: 12, position: 'absolute', left: 0, top: 20, width: 200, overflow: 'hidden', whiteSpace: 'nowrap'}} className="app-tags">
+        <InputTagsContainer
+          tags={this.state.tags}
+          handleUpdateTags={this.handleUpdateTags} inputPlaceholder="tags" />
+      </div>
+      <div style={{fontSize: 12, position: 'absolute', right: 0, top: 20, width: 100, overflow: 'hidden', whiteSpace: 'nowrap'}} title={serverFront}>
+        {serverFront}
+      </div>
     </div>
   }
 }
 
 class TimeCell extends React.Component {
   render() {
-    let title
+    let title, elo_rating_10
+
+    // refactor this to get this variable only once!!!
+    const parser = document.createElement('a')
+    parser.href = window.location.href
+    const clan_tag = parser.pathname.substring(1).split('/')[1]
+    const clan_a = this.props.data.clan_a
+    const clan_b = this.props.data.clan_b
+
     if(this.props.data.is_fake) {
       title = 'No opponent'
     } else {
-      title = this.props.data.clan_a && this.props.data.clan_a.tag;
-      if (this.props.data.clan_b) {
+      if(clan_a && clan_a.tag !== clan_tag) elo_rating_10 = clan_a.elo_rating_10
+
+      title = clan_a && clan_a.tag;
+      if(clan_b) {
+        if(clan_b.tag !== clan_tag) elo_rating_10 = clan_b.elo_rating_10
         title = `${title} vs ${this.props.data.clan_b.tag}`
       }
     }
-    return <div>{this.props.data.title} {title}</div>
+    if(elo_rating_10) {
+      return <div style={{fontSize:11+'px'}}>
+        {this.props.data.title} {moment(this.props.data.time).format('HH:mm')}<br />
+        {title}<br/>
+        Elo10: {elo_rating_10}
+      </div>
+    } else {
+      return <div style={{fontSize:11+'px'}}>
+        {this.props.data.title} {moment(this.props.data.time).format('HH:mm')}<br />
+        {title}<br/>
+      </div>
+    }
+  }
+}
+
+class OwnedProvinces extends React.Component {
+  render() {
+
   }
 }
 
@@ -146,15 +204,16 @@ const data = [
 
 class App extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     const parser = document.createElement('a')
     parser.href = window.location.href
 
     const path = parser.pathname.substring(1).split('/')
     this.state = {
+      scale: 12500,
       region: path[0],
       tag: path[1],
-      clan: null,
+      clan_id: null,
       items: [],
       start: moment(~~(moment()/(15*60*1000))*15*60*1000),
     }
@@ -166,28 +225,60 @@ class App extends Component {
   }
 
   componentDidMount() {
-    console.log('componentDidMount')
-    this.fetchAsync(this.state.tag, this.state.region).then(res => {
-      console.log(res)
-      const now = moment()
-      res.start = res.items[0].start_time
-      if (res.start < now) {
-        res.start = now - now % 1800000
-      }
-      this.setState(res)
-    })
+    if(this.state.tag && this.state.region) {
+      this.fetchAsync(this.state.tag, this.state.region).then(res => {
+        console.log(res)
+        const now = moment()
+        res.start = res.items[0].start_time
+        if (res.start < now) {
+          res.start = now - now % 1800000
+        }
+        res.items.forEach(e => e['clan_id'] = res.clan_id)
+
+        this.setState(res)
+      })
+    }
   }
 
   setClan = (region, clanTag) => {
     console.log(`Setting clan ${region} / ${clanTag}`)
+    if(location.port !== "") {
+      window.location = `${location.protocol}//${location.hostname}:${location.port}/${region}/${clanTag}`
+    } else {
+      window.location = `${location.protocol}//${location.hostname}/${region}/${clanTag}`
+    }
+
+  }
+
+  addTime = (val) => {
+    if(val !== undefined) {
+      this.setState(prevState => ({start: prevState.start + val * 60000}))
+    } else {
+      this.setState({start: ~~(moment()/(15*60*1000))*15*60*1000})
+    }
+  }
+
+  addScale = (val) => {
+    if(val !== undefined) {
+      this.setState(prevState => ({scale: prevState.scale + val}))
+    } else {
+      this.setState({scale: 12500})
+    }
+
   }
 
   render() {
-    console.log(this.state.items)
-    return (
-      <div>
-        <Nav title={this.state.clan_tag} clan={this.state.clan} setClan={this.setClan}/>
+    let content
+    if(this.state.tag && this.state.region) {
+      content = <div>
+        <button onClick={(e) => this.addTime(-30)}>-30 min</button>
+        <button onClick={(e) => this.addTime()}>now</button>
+        <button onClick={(e) => this.addTime(+30)}>+30 min</button>
+        <button onClick={(e) => this.addScale(+600)}>zoom -</button>
+        <button onClick={(e) => this.addScale()}>reset zoom</button>
+        <button onClick={(e) => this.addScale(-600)}>zoom +</button>
         <Timeline
+          scale={this.state.scale}
           start={this.state.start}
           rowCell={RowCell}
           rowHeight={50}
@@ -195,6 +286,15 @@ class App extends Component {
           items={this.state.items}
           updateClan={this.updateClan}
         />
+      </div>
+    } else {
+      content = <h1 style={{textAlign: 'center'}}><a href="/ru/lecat">Clan LECAT</a></h1>
+    }
+
+    return (
+      <div>
+        <Nav region={this.state.region} clanTag={this.state.tag} clanId={this.state.clan_id} setClan={this.setClan}/>
+        {content}
       </div>
     );
   }
