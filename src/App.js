@@ -127,6 +127,12 @@ class TimeCell extends React.Component {
         if(clan_b.tag !== clan_tag) elo_rating_10 = clan_b.elo_rating_10
         title = `${title} vs ${this.props.data.clan_b.tag}`
       }
+      if(! clan_a && this.props.data.pretenders) {
+        const text = this.props.data.pretenders.map(i => `[${i['tag']},${i['elo_rating_10']}]`).join(',')
+        title = <span style={{whiteSpace: 'nowrap'}} title={text}>
+          {this.props.data.pretenders.length} clans : {text}
+          </span>
+      }
     }
     if(elo_rating_10) {
       return <div style={{fontSize:11+'px'}}>
@@ -209,10 +215,27 @@ class App extends Component {
     parser.href = window.location.href
 
     const path = parser.pathname.substring(1).split('/')
+    const region = path[0]
+    const tag = path[1]
+    let title;
+
+    if (region === 'ru') {
+      title = "Гонка Вооружений. День"
+    } else  {
+      title = "The Arms Race. Day"
+    }
+    const start = moment('2018-05-28T03:00:00+00:00')
+    const headerGroup = [...Array(14).keys()].map(index => ({
+      time: start.clone().add({days: index}),
+      duration: 864001000,
+      title: `${title} ${index+1} / 14`,
+    }))
+
     this.state = {
+      headerGroup: headerGroup,
       scale: 12500,
-      region: path[0],
-      tag: path[1],
+      region: region,
+      tag: tag,
       clan_id: null,
       items: [],
       start: moment(~~(moment()/(15*60*1000))*15*60*1000),
@@ -285,6 +308,7 @@ class App extends Component {
           timeCell={TimeCell}
           items={this.state.items}
           updateClan={this.updateClan}
+          headerGroup={this.state.headerGroup}
         />
       </div>
     } else {
