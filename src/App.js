@@ -118,7 +118,7 @@ class TimeCell extends React.Component {
     // refactor this to get this variable only once!!!
     const parser = document.createElement('a')
     parser.href = window.location.href
-    const clan_tag = parser.pathname.substring(1).split('/')[1]
+    const clan_tag = parser.pathname.substring(1).split('/')[1].toUpperCase()
     const clan_a = this.props.data.clan_a
     const clan_b = this.props.data.clan_b
 
@@ -128,12 +128,23 @@ class TimeCell extends React.Component {
       if(clan_a && clan_a.tag !== clan_tag) elo_rating_10 = clan_a.elo_rating_10
 
       title = clan_a && clan_a.tag;
+
       if(clan_b) {
         if(clan_b.tag !== clan_tag) elo_rating_10 = clan_b.elo_rating_10
         title = `${title} vs ${this.props.data.clan_b.tag}`
       }
       if(! clan_a && this.props.data.pretenders) {
-        const text = this.props.data.pretenders.map(i => `[${i['tag']},${i['elo_rating_10']}]`).join(',')
+        const text = this.props.data.pretenders.map(i => {
+          const tag = i['tag']
+          const xp = i['xp']
+          let metric = '';
+          if (xp === 0 || xp === null) {
+            metric = `ELO${i['elo_rating_10']}`
+          } else {
+            metric =  `XP${xp}`
+          }
+          return `[${tag},${metric}]`
+        })
         title = <span style={{whiteSpace: 'nowrap'}} title={text}>
           {this.props.data.pretenders.length} clans : {text}
           </span>
