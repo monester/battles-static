@@ -87,6 +87,8 @@ class RowCell extends React.Component {
     const start_time = moment(this.props.data.start_time)
     const serverFront = `${this.props.data.server} / ${this.props.data.front_name}`
 
+    const allPretenders = this.props.data.pretenders.join(',')
+
     return <div>
       <a style={{fontSize: 12, position: 'absolute', left: 0, top: 0, width: 260, overflow: 'hidden', whiteSpace: 'nowrap'}}
         href={`https://${this.props.data.region}.wargaming.net/globalmap/#province/${this.props.data.id}`} title={title}>
@@ -99,8 +101,11 @@ class RowCell extends React.Component {
           tags={this.state.tags}
           handleUpdateTags={this.handleUpdateTags} inputPlaceholder="tags" />
       </div>
-      <div style={{fontSize: 12, position: 'absolute', right: 0, top: 20, width: 100, overflow: 'hidden', whiteSpace: 'nowrap'}} title={serverFront}>
+      <div style={{fontSize: 12, position: 'absolute', right: 0, top: 15, width: 100, overflow: 'hidden', whiteSpace: 'nowrap'}} title={serverFront}>
         {serverFront}
+      </div>
+      <div style={{fontSize: 12, position: 'absolute', right: 0, top: 30, width: 100, overflow: 'hidden', whiteSpace: 'nowrap'}} title={allPretenders}>
+        {this.props.data.pretenders.length} Clans: {allPretenders}
       </div>
     </div>
   }
@@ -252,12 +257,16 @@ class App extends Component {
       this.fetchAsync(this.state.tag, this.state.region).then(res => {
         console.log(res)
         const now = moment()
-        res.start = res.items[0].start_time
-        if (res.start < now) {
-          res.start = now - now % 1800000
+        if(res.items.length > 0) {
+          res.start = res.items[0].start_time
+          if (res.start < now) {
+            res.start = now - now % 1800000
+          }
+          // add clan_id to each row to use it in rowCell to set tags for province
+          res.items.forEach(e => e['clan_id'] = res.clan_id)
+        } else {
+          res.start = now
         }
-        res.items.forEach(e => e['clan_id'] = res.clan_id)
-
         this.setState(res)
       })
     }
