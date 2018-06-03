@@ -321,8 +321,8 @@ class App extends Component {
       <div>
         <Nav region={this.state.region} clanTag={this.state.tag} clanId={this.state.clan_id} setClan={this.setClan}/>
         {content}
-        <p style={{width: '100%', textAlign: 'center', color: 'red'}}>
-          <span>Ошибка в таблице? - </span><a href="https://t.me/battlesuniversecc">telegram / @battlesuniversecc</a>
+        <p style={{width: '100%', textAlign: 'center', color: 'gray', fontSize: '14px'}}>
+          <span><span style={{color: 'red'}}>Ошибка в таблице?</span> Не хватает информации? Пишите сюда - </span><a href="https://t.me/battlesuniversecc">telegram / @battlesuniversecc</a>
         </p>
       </div>
     );
