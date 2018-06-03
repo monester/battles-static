@@ -165,63 +165,29 @@ class TimeCell extends React.Component {
   }
 }
 
-class OwnedProvinces extends React.Component {
-  render() {
 
+class Province extends React.Component {
+  render() {
+    const province_name = this.props.data.province_name
+    return <div className="province-item">
+      <h5>{province_name}</h5>
+      <p>Прайм: {this.props.data.prime_time} UTC</p>
+    </div>
   }
 }
 
-const min30 = 30*60*1000;
-const hour = 3600000;
-const day = hour * 24;
-const data = [
-  {
-    province_name: 'xx', id: 'xx',
-    prime_time: '18:00',
-    times: [{
-      time: moment(Math.ceil(moment() / min30) * min30 + min30),
-      duration: min30/2, clan_a: null, clan_b: null,
-    }, {
-      time: moment(Math.ceil(moment() / min30) * min30 + min30 * 1.5),
-      duration: min30/2, clan_a: null, clan_b: null,
-    }, {
-      time: moment(Math.ceil(moment() / min30) * min30 + min30*3),
-      duration: min30*1.5, clan_a: null, clan_b: null,
-    }]
-  }, {
-    province_name: 'yy', id: 'yy',
-    prime_time: '18:00',
-    times: [{
-      time: moment(Math.ceil(moment() / min30) * min30 + min30 * 8 - min30 * 0.1),
-      duration: min30 / 2, clan_a: null, clan_b: null,
-    }, {
-      time: moment(Math.ceil(moment() / min30) * min30 + min30 * 8.5),
-      duration: min30 / 2, clan_a: null, clan_b: null,
-    }, {
-      time: moment(Math.ceil(moment() / min30) * min30 + min30 * 9),
-      duration: min30, clan_a: null, clan_b: null,
-    }, {
-      time: moment(Math.ceil(moment() / min30) * min30 + min30 * 12),
-      duration: min30, clan_a: null, clan_b: null,
-    }]
-  }, {
-    province_name: 'fort', id: 'fort',
-    prime_time: '18:00',
-    times: [{
-      time: moment(Math.ceil(moment() / min30) * min30 + min30 * 8),
-      duration: min30 / 2, clan_a: null, clan_b: null,
-    }, {
-      time: moment(Math.ceil(moment() / min30) * min30 + min30 * 8.5),
-      duration: min30 / 2, clan_a: null, clan_b: null,
-    }, {
-      time: moment(Math.ceil(moment() / min30) * min30 + min30 * 9),
-      duration: min30, clan_a: null, clan_b: null,
-    }, {
-      time: moment(Math.ceil(moment() / min30) * min30 + min30 * 48),
-      duration: min30, clan_a: null, clan_b: null,
-    }]
+
+class ClanProvinces extends React.Component {
+  render() {
+    const provinces = this.props.provinces.map(p => <Province data={p} />)
+    return <div>
+      <h5>Провинции клана</h5>
+      <div className="clan-provinces">
+        {provinces}
+      </div>
+    </div>
   }
-];
+}
 
 
 class App extends Component {
@@ -255,6 +221,7 @@ class App extends Component {
       clan_id: null,
       items: [],
       start: moment(~~(moment()/(15*60*1000))*15*60*1000),
+      clan_provinces: [],
     }
   }
 
@@ -307,7 +274,6 @@ class App extends Component {
     } else {
       this.setState({scale: 12500})
     }
-
   }
 
   render() {
@@ -330,6 +296,7 @@ class App extends Component {
           updateClan={this.updateClan}
           headerGroup={this.state.headerGroup}
         />
+        <ClanProvinces provinces={this.state.clan_provinces} />
       </div>
     } else {
       content = <h1 style={{textAlign: 'center'}}><a href="/ru/lecat">Clan LECAT</a></h1>

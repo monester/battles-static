@@ -9,3 +9,14 @@
 .react-input-tags-tag button {
     padding: 0 2px 0;margin: 0;border: 0;font-size: 10px;
 }
+
+
+.clan-provinces {
+    display: flex; /* or inline-flex */
+}
+
+.province-item {
+    width: 200px;
+    margin: 5px;
+    border: 1px solid black;
+}
