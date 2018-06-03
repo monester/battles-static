@@ -171,7 +171,10 @@ class Province extends React.Component {
     const province_name = this.props.data.province_name
     return <div className="province-item">
       <h5>{province_name}</h5>
-      <p>Прайм: {this.props.data.prime_time} UTC</p>
+      <p>
+        Прайм: {this.props.data.prime_time} UTC<br/>
+        Карта: {this.props.data.arena_name}
+      </p>
     </div>
   }
 }
@@ -179,7 +182,19 @@ class Province extends React.Component {
 
 class ClanProvinces extends React.Component {
   render() {
-    const provinces = this.props.provinces.map(p => <Province data={p} />)
+    const provinces = this.props.provinces.sort((a, b) => {
+      const a_time = a.prime_time.split(':')
+      const a_hour = parseInt(a_time[0])
+      const a_minute = parseInt(a_time[1])
+      const b_time = b.prime_time.split(':')
+      const b_hour = parseInt(b_time[0])
+      const b_minute = parseInt(b_time[1])
+      if(a_hour > b_hour) return 1
+      else if(a_hour < b_hour) return -1
+      else if(a_minute > b_minute) return 1
+      else if(a_minute < b_minute) return -1
+      return 0
+    }).map(p => <Province data={p} />)
     return <div>
       <h5>Провинции клана</h5>
       <div className="clan-provinces">
@@ -306,6 +321,9 @@ class App extends Component {
       <div>
         <Nav region={this.state.region} clanTag={this.state.tag} clanId={this.state.clan_id} setClan={this.setClan}/>
         {content}
+        <p style={{width: '100%', textAlign: 'center', color: 'red'}}>
+          <span>Ошибка в таблице? - </span><a href="https://t.me/battlesuniversecc">telegram / @battlesuniversecc</a>
+        </p>
       </div>
     );
   }
