@@ -196,7 +196,7 @@ class ClanProvinces extends React.Component {
       return 0
     }).map(p => <Province data={p} />)
     return <div>
-      <h5>Провинции клана</h5>
+      <h5>Провинции клана (количество: {this.props.provinces.length})</h5>
       <div className="clan-provinces">
         {provinces}
       </div>
