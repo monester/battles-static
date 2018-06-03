@@ -13,6 +13,7 @@
 
 .clan-provinces {
     display: flex; /* or inline-flex */
+    flex-wrap: wrap;
 }
 
 .province-item {
