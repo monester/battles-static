@@ -113,7 +113,7 @@ class RowCell extends React.Component {
 
 class TimeCell extends React.Component {
   render() {
-    let title, elo_rating_10
+    let title, elo_rating_10, fame_points, fame_points_title;
 
     // refactor this to get this variable only once!!!
     const parser = document.createElement('a')
@@ -125,12 +125,18 @@ class TimeCell extends React.Component {
     if(this.props.data.is_fake) {
       title = 'No opponent'
     } else {
-      if(clan_a && clan_a.tag !== clan_tag) elo_rating_10 = clan_a.elo_rating_10
+      if(clan_a && clan_a.tag !== clan_tag) {
+        elo_rating_10 = clan_a.elo_rating_10
+        fame_points = clan_a.fame_points
+      }
 
       title = clan_a && clan_a.tag;
 
       if(clan_b) {
-        if(clan_b.tag !== clan_tag) elo_rating_10 = clan_b.elo_rating_10
+        if(clan_b.tag !== clan_tag) {
+          elo_rating_10 = clan_b.elo_rating_10
+          fame_points = clan_b.fame_points
+        }
         title = `${title} vs ${this.props.data.clan_b.tag}`
       }
       if(! clan_a && this.props.data.pretenders) {
@@ -150,11 +156,15 @@ class TimeCell extends React.Component {
           </span>
       }
     }
+    if(fame_points) {
+      fame_points_title = `Очков Славы: ${fame_points}`
+      fame_points = `ОС: ${fame_points}`
+    }
     if(elo_rating_10) {
       return <div style={{fontSize:11+'px'}}>
         {this.props.data.title} {moment(this.props.data.time).format('HH:mm')}<br />
         {title}<br/>
-        Elo10: {elo_rating_10}
+        Elo10: {elo_rating_10} <span title={fame_points_title}>{fame_points}</span>
       </div>
     } else {
       return <div style={{fontSize:11+'px'}}>
