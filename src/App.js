@@ -156,7 +156,7 @@ class TimeCell extends React.Component {
           </span>
       }
     }
-    if(fame_points) {
+    if(fame_points !== null && fame_points !== undefined) {
       fame_points_title = `Очки славы: ${fame_points}`
       fame_points = `ОС: ${fame_points}`
     }
