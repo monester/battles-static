@@ -157,7 +157,7 @@ class TimeCell extends React.Component {
       }
     }
     if(fame_points) {
-      fame_points_title = `Очков Славы: ${fame_points}`
+      fame_points_title = `Очки славы: ${fame_points}`
       fame_points = `ОС: ${fame_points}`
     }
     if(elo_rating_10) {
@@ -179,8 +179,11 @@ class TimeCell extends React.Component {
 class Province extends React.Component {
   render() {
     const province_name = this.props.data.province_name
+    const region = this.props.region
+    const province_id = this.props.data.province_id
+    const url = `https://${region}.wargaming.net/globalmap/#province/${province_id}`;
     return <div className="province-item">
-      <h5>{province_name}</h5>
+      <h5><a href={url}>{province_name}</a></h5>
       <p>
         Прайм: {this.props.data.prime_time} UTC<br/>
         Карта: {this.props.data.arena_name}
@@ -204,7 +207,7 @@ class ClanProvinces extends React.Component {
       else if(a_minute > b_minute) return 1
       else if(a_minute < b_minute) return -1
       return 0
-    }).map(p => <Province data={p} />)
+    }).map(p => <Province region={this.props.region} data={p} />)
     return <div>
       <h5>Провинции клана (количество: {this.props.provinces.length})</h5>
       <div className="clan-provinces">
@@ -321,7 +324,7 @@ class App extends Component {
           updateClan={this.updateClan}
           headerGroup={this.state.headerGroup}
         />
-        <ClanProvinces provinces={this.state.clan_provinces} />
+        <ClanProvinces region={this.state.region} provinces={this.state.clan_provinces} />
       </div>
     } else {
       content = <h1 style={{textAlign: 'center'}}><a href="/ru/lecat">Clan LECAT</a></h1>
