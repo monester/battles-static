@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React, { Component } from 'react';
 import './App.css';
-import { Timeline } from './react-timeline';
+import { Timeline } from '@monester/react-timeline';
 import moment from 'moment'
 import { InputTagsContainer } from 'react-input-tags';
 import {API_ROOT} from './api-config'
