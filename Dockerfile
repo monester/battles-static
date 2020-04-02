@@ -1,11 +1,15 @@
-FROM node
+FROM node AS build
 
-WORKDIR /workdir
-COPY "." "/workdir"
+WORKDIR /src
+COPY public /src/public
+COPY src /src/src
+COPY package.json yarn.lock /src
 
-RUN npm install
-RUN npm run build
+RUN yarn install
+
+RUN yarn run build
 
 FROM nginx
 
-COPY --from=0 /workdir/build /usr/share/nginx/html
+COPY default.conf /etc/nginx/conf.d
+COPY --from=build /src/build /usr/share/nginx/html
